@@ -19,13 +19,13 @@ namespace ModelReplacementTool
     public class ToolComponent : MonoBehaviour
     {
         public PlayerControllerB controller;
-        public BodyReplacementBase bodyReplacement;
+        public BodyReplacement bodyReplacement;
 
-        Dictionary<string, BoneMap.MappedBone?> mappedBonesInModel = new Dictionary<string, BoneMap.MappedBone> ();
+        Dictionary<string, MappedBone?> mappedBonesInModel = new Dictionary<string, MappedBone> ();
         Dictionary<string, BonePanel> PanelsPerMappedBone = new Dictionary<string, BonePanel>();
         public bool doSymmetric = true;
 
-        public BoneMap map;
+        public IBoneMap map;
         Transform[] allbones;
         public List<string> GetUnmappedBoneNames()
         {
@@ -134,7 +134,7 @@ namespace ModelReplacementTool
         void Awake()
         {
             controller = base.GetComponent<PlayerControllerB>();
-            bodyReplacement = base.GetComponent<BodyReplacementBase>();
+            bodyReplacement = base.GetComponent<BodyReplacement>();
             map = bodyReplacement.Map;
             camOrigTrans = controller.cameraContainerTransform.parent;
 
@@ -158,12 +158,12 @@ namespace ModelReplacementTool
                 mappedBonesInModel.Add(item, null);
             }
 
-            map.GetMappedBones().ForEach(x =>
+            foreach (var x in map.MappedBones)
             {
-                mappedBonesInModel[x.playerBoneString] = x;
-                Console.WriteLine( x.rotationOffset.y );
-                Console.WriteLine("BONE BONE");
-            });
+				mappedBonesInModel[x.playerBoneString] = x;
+				Console.WriteLine(x.rotationOffset.y);
+				Console.WriteLine("BONE BONE");
+			}
 
 
             Console.WriteLine("a");
@@ -261,16 +261,26 @@ namespace ModelReplacementTool
         {
             GUI.FocusControl(null);
             Console.WriteLine("REF");
-            string jsonStr = map.SerializeToJsonString();
-            jsonStr= JValue.Parse(jsonStr).ToString(Formatting.Indented);
-            Console.WriteLine(jsonStr);
-            string toPath = bodyReplacement.jsonPath;
-            Console.WriteLine(toPath);
-            File.WriteAllText(toPath, jsonStr);
+            TryOutputBodyReplacementBaseJson();
         }
 
+        [Obsolete]
+        void TryOutputBodyReplacementBaseJson()
+        {
+            if (bodyReplacement is not BodyReplacementBase bodyReplacementBase) return;
+			if (map is not BoneMap boneMap) return;
 
-        void Start()
+			string jsonStr = boneMap.SerializeToJsonString();
+			jsonStr = JValue.Parse(jsonStr).ToString(Formatting.Indented);
+			Console.WriteLine(jsonStr);
+			string toPath = bodyReplacementBase.jsonPath;
+			Console.WriteLine(toPath);
+			File.WriteAllText(toPath, jsonStr);
+		}
+
+
+
+		void Start()
         {
             controller.gameObject.transform.position += new Vector3(0, 0, 1);
             controller.gameObject.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.up);

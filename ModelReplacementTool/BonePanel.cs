@@ -38,8 +38,8 @@ namespace ModelReplacementTool
       
 
 
-        public BoneMap.MappedBone mapped = null;
-        public BoneMap map = null;
+        public MappedBone mapped = null;
+        public IBoneMap map = null;
         public bool isRootBone = false;
         public bool isItemHolder = false;
 
@@ -96,13 +96,13 @@ namespace ModelReplacementTool
             {
                 if (isRootBone)
                 {
-                    map.UpdateRootBoneAndOffset(map.RootBone(), new Vector3(xf, yf, zf));
+                    map.UpdateRootBoneAndOffset(map.RootBone, new Vector3(xf, yf, zf));
 
 
                 }
                 if (isItemHolder)
                 {
-                    map.UpdateItemHolderBoneAndOffset(map.ItemHolder(), new Vector3(xf, yf, zf));
+                    map.UpdateItemHolderBoneAndOffset(map.ItemHolder, new Vector3(xf, yf, zf));
 
                 }
             }
@@ -138,11 +138,11 @@ namespace ModelReplacementTool
                 {
                    
 
-                    var b = map.modelBoneList.Where(x => x.name == modelBoneString);
+                    var b = map.ModelBones.Where(x => x.name == modelBoneString);
 
                     Transform mdTransform = null;
 
-                    if (b.Any()) { map.UpdateItemHolderBoneAndOffset(b.First(),map.ItemHolderPositionOffset()); }
+                    if (b.Any()) { map.UpdateItemHolderBoneAndOffset(b.First(),map.ItemHolderPositionOffset); }
                     else
                     {
                         Console.WriteLine("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
@@ -188,7 +188,7 @@ namespace ModelReplacementTool
 
         }
 
-        public void SetMappedBone(BoneMap.MappedBone mappedBone, string name)
+        public void SetMappedBone(MappedBone mappedBone, string name)
         {
             mapped = mappedBone;
             playerText.text = name;
@@ -218,9 +218,9 @@ namespace ModelReplacementTool
                 if (isRootBone)
                 {
                     playerText.text = "player RootBone";
-                    xf = map.PositionOffset().x;
-                    yf = map.PositionOffset().y;
-                    zf = map.PositionOffset().z;
+                    xf = map.PositionOffset.x;
+                    yf = map.PositionOffset.y;
+                    zf = map.PositionOffset.z;
 
 
 
@@ -228,9 +228,9 @@ namespace ModelReplacementTool
                 if (isItemHolder)
                 {
                     playerText.text = "player ItemHolder";
-                    xf = map.ItemHolderPositionOffset().x;
-                    yf = map.ItemHolderPositionOffset().y;
-                    zf = map.ItemHolderPositionOffset().z;
+                    xf = map.ItemHolderPositionOffset.x;
+                    yf = map.ItemHolderPositionOffset.y;
+                    zf = map.ItemHolderPositionOffset.z;
                 }
 
             }
@@ -244,11 +244,11 @@ namespace ModelReplacementTool
             {
                 if (isRootBone)
                 {
-                    return map.RootBone().name;
+                    return map.RootBone.name;
                 }
                 if (isItemHolder)
                 {
-                    return map.ItemHolder().name;
+                    return map.ItemHolder.name;
                 }
             }
             if(mapped != null)

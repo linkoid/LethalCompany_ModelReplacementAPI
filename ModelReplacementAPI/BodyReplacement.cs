@@ -14,7 +14,7 @@ using UnityEngine.InputSystem.HID;
 
 namespace ModelReplacement
 {
-    public abstract class BodyReplacementBase : MonoBehaviour
+    public abstract class BodyReplacement : MonoBehaviour
     {
         public bool localPlayer => (ulong)StartOfRound.Instance.thisClientPlayerId == controller.playerClientId;
         public bool renderLocalDebug = false;
@@ -45,17 +45,15 @@ namespace ModelReplacement
 
 
         // public bool alive = true;
-        public string boneMapJsonStr;
-        public string jsonPath;
 
-        public BoneMap Map;
+        public IBoneMap Map;
         public PlayerControllerB controller;
         public GameObject replacementModel;
 
         //Ragdoll components
         public GameObject deadBody = null;
         public GameObject replacementDeadBody = null;
-        public BoneMap ragDollMap;
+        public IBoneMap ragDollMap;
 
         //Misc components
         private MeshRenderer nameTagObj = null;
@@ -70,10 +68,6 @@ namespace ModelReplacement
 
 
         //Abstract methods 
-        /// <summary>
-        /// the name of this model replacement's bone mapping .json. Can be anywhere in the bepinex/plugins folder
-        /// </summary>
-        public abstract string boneMapFileName { get; }
         /// <summary>
         /// Loads necessary assets from assetBundle, perform any necessary modifications on the replacement character model and return it.
         /// </summary>
@@ -132,10 +126,10 @@ namespace ModelReplacement
             }
 
             //Make the replacement ragdoll bonemap and parent it
-            ragDollMap = BoneMap.DeserializeFromJson(boneMapJsonStr);
+            ragDollMap = LoadBoneMap();
             ragDollMap.MapBones(deadBodyRenderer.bones, replacementMappedBones);
-            ragDollMap.RootBone().parent = deadBodyRenderer.rootBone;
-            ragDollMap.RootBone().localPosition = Vector3.zero + Map.PositionOffset();
+            ragDollMap.RootBone.parent = deadBodyRenderer.rootBone;
+            ragDollMap.RootBone.localPosition = Vector3.zero + Map.PositionOffset;
 
             //blood decals not working
             foreach (var item in bodyinfo.bodyBloodDecals)
@@ -175,7 +169,7 @@ namespace ModelReplacement
                 Destroy(this);
             }
    
-            Map = BoneMap.DeserializeFromJson(boneMapJsonStr);
+            Map = LoadBoneMap();
             Map.MapBones(controller.thisPlayerModel.bones, GetMappedBones());
             Map.SetBodyReplacement(this);
             ReparentModel();
@@ -183,6 +177,8 @@ namespace ModelReplacement
 
 
         }
+
+        protected abstract IBoneMap LoadBoneMap();
 
 
         internal void Awake()
@@ -238,18 +234,7 @@ namespace ModelReplacement
             float scale = playerBodyExtents.y / GetBounds().extents.y;
             replacementModel.transform.localScale *= scale;
 
-            //Get all .jsons in plugins and select the matching boneMap.json, deserialize bone map
-            string pluginsPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            while (true)
-            {
-                string folder = new DirectoryInfo(pluginsPath).Name;
-                if(folder == "plugins") { break; }
-                pluginsPath = Path.Combine(pluginsPath, "..");
-            }
-            string[] allfiles = Directory.GetFiles(pluginsPath, "*.json", SearchOption.AllDirectories);
-            jsonPath = allfiles.Where(f => Path.GetFileName(f) == boneMapFileName).First();
-            boneMapJsonStr = File.ReadAllText(jsonPath);
-            Map = BoneMap.DeserializeFromJson(boneMapJsonStr);
+            Map = LoadBoneMap();
 
             //Map bones and parent mdodel
             Map.MapBones(controller.thisPlayerModel.bones, GetMappedBones());
@@ -267,8 +252,8 @@ namespace ModelReplacement
 
         public void ReparentModel()
         {
-            Map.RootBone().parent = controller.thisPlayerModel.rootBone;
-            Map.RootBone().localPosition = Vector3.zero + Map.PositionOffset();
+            Map.RootBone.parent = controller.thisPlayerModel.rootBone;
+            Map.RootBone.localPosition = Vector3.zero + Map.PositionOffset;
         }
 
         public virtual void AfterStart()
@@ -374,7 +359,7 @@ namespace ModelReplacement
 
         void Update()
         {
-            if (Map.CompletelyDestroyed())
+            if (Map.CompletelyDestroyed)
             {
                 Destroy(this);
                 return;

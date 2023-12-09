@@ -61,7 +61,7 @@ namespace ModelReplacementTool
                 bool localPlayer = (ulong)StartOfRound.Instance.thisClientPlayerId == __instance.playerClientId;
                 if (!localPlayer) { return; }
                 
-                BodyReplacementBase component = __instance.gameObject.GetComponent<BodyReplacementBase>();
+                BodyReplacement component = __instance.gameObject.GetComponent<BodyReplacement>();
                 if (component == null) { return; }
                 if (__instance.gameObject.GetComponent<ToolComponent>()) { return; }
                 __instance.gameObject.AddComponent<ToolComponent>();

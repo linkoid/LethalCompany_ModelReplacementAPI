@@ -59,7 +59,7 @@ namespace ModelReplacement
         public static void RegisterSuitModelReplacement(string suitNameToReplace, Type type)
         {
             suitNameToReplace = suitNameToReplace.ToLower().Replace(" ", "");
-            if (!(type.IsSubclassOf(typeof(BodyReplacementBase))))
+            if (!(type.IsSubclassOf(typeof(BodyReplacement))))
             {
                 Instance.Logger.LogError($"Cannot register body replacement type {type.Name}, must inherit from BodyReplacementBase");
                 return;
@@ -82,12 +82,12 @@ namespace ModelReplacement
         /// <param name="type">typeof body replacement class. Must inherit from BodyReplacementBase</param>
         public static void SetPlayerModelReplacement(PlayerControllerB player, Type type)
         {
-            if (!(type.IsSubclassOf(typeof(BodyReplacementBase))))
+            if (!(type.IsSubclassOf(typeof(BodyReplacement))))
             {
                 Instance.Logger.LogError($"Cannot set body replacement of type {type.Name}, must inherit from BodyReplacementBase");
                 return;
             }
-            var a = player.thisPlayerBody.gameObject.GetComponent<BodyReplacementBase>();
+            var a = player.thisPlayerBody.gameObject.GetComponent<BodyReplacement>();
             if (a != null)
             {
                 if (a.GetType() == type)
@@ -108,7 +108,7 @@ namespace ModelReplacement
         /// <param name="player"></param>
         public static void RemovePlayerModelReplacement(PlayerControllerB player)
         {
-            var a = player.thisPlayerBody.gameObject.GetComponent<BodyReplacementBase>();
+            var a = player.thisPlayerBody.gameObject.GetComponent<BodyReplacement>();
             if (a)
             {
                 Destroy(a);
@@ -126,14 +126,14 @@ namespace ModelReplacement
             {
                 if (__instance.parentObject == null) { return; }
                 if (__instance.playerHeldBy == null) { return; }
-                var a = __instance.playerHeldBy.gameObject.GetComponent<BodyReplacementBase>();
+                var a = __instance.playerHeldBy.gameObject.GetComponent<BodyReplacement>();
                 if (a == null) { return; }
                 if (a.RenderBodyReplacement())
                 {
                     if(a.renderLocalDebug && !a.renderModel) { return; }
 
-                    Transform parentObject = a.Map.ItemHolder();
-                    Vector3 positionOffset = a.Map.ItemHolderPositionOffset();
+                    Transform parentObject = a.Map.ItemHolder;
+                    Vector3 positionOffset = a.Map.ItemHolderPositionOffset;
 
                     __instance.transform.rotation = parentObject.rotation;
                     __instance.transform.Rotate(__instance.itemProperties.rotationOffset);
@@ -162,11 +162,11 @@ namespace ModelReplacement
                 foreach (var item in __instance.allPlayerScripts)
                 {
                     if (!item.isPlayerDead) { continue; } //player isn't dead
-                    if (item.gameObject.GetComponent<BodyReplacementBase>() == null) { continue; } //player doesn't have a body replacement
+                    if (item.gameObject.GetComponent<BodyReplacement>() == null) { continue; } //player doesn't have a body replacement
 
                     Console.WriteLine($"Reinstantiating model replacement for {item.playerUsername} ");
-                    Type BodyReplacementType = item.gameObject.GetComponent<BodyReplacementBase>().GetType();
-                    Destroy(item.gameObject.GetComponent<BodyReplacementBase>());
+                    Type BodyReplacementType = item.gameObject.GetComponent<BodyReplacement>().GetType();
+                    Destroy(item.gameObject.GetComponent<BodyReplacement>());
                     item.gameObject.AddComponent(BodyReplacementType);
                 }
             }

@@ -13,7 +13,7 @@ using ModelReplacement;
 
 namespace HatsuneMikuModelReplacement
 {
-    public class BodyReplacementMiku : BodyReplacementBase
+    public class BodyReplacementMiku : BodyReplacement
     {
         public override string boneMapFileName => "boneMapMiku.json";
 
